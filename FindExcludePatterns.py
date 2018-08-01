@@ -5,9 +5,8 @@ class FindExcludePatternsOMG(sublime_plugin.EventListener):
 
     def on_window_command(self, window, command_name, args):
         if command_name == 'show_panel' and 'panel' in args and args['panel'] == 'find_in_files' and 'FindExcludePatternsOMG' not in args:
-            s = sublime.load_settings('Preferences.sublime-settings')
-            exclude = list(set(list(s.get('index_exclude_patterns', []) +
-                                    s.get('binary_file_patterns', []))))
+            exclude = self.get_exclude_patterns()
+            print(exclude)
 
             for k, v in enumerate(exclude):
                 exclude[k] = exclude[k].replace('\\', '/')
@@ -37,3 +36,16 @@ class FindExcludePatternsOMG(sublime_plugin.EventListener):
             args['FindExcludePatternsOMG'] = 1
 
             return (command_name, args)
+
+    def get_exclude_patterns(self):
+        index_exclude_patterns = self.get_setting('index_exclude_patterns')
+        binary_file_patterns = self.get_setting('binary_file_patterns')
+        print(index_exclude_patterns, binary_file_patterns)
+        return list(set(list(index_exclude_patterns + binary_file_patterns)))
+
+    def get_setting(self, setting):
+        project_settings = sublime.active_window().active_view().settings()
+        sublime_settings = sublime.load_settings('Preferences.sublime-settings')
+        project_setting = project_settings.get(setting, [])
+        sublime_setting = sublime_settings.get(setting, [])
+        return project_setting + sublime_setting
